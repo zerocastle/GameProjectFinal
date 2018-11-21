@@ -22,12 +22,12 @@ import ys.db.InsertRank;
 import ys.db.ShowRank;
 
 public class DoubleBuffering extends JFrame implements Runnable {
-
+	public int eSpeedUp = 0; //점수에 따라 스피드를 추가해주는 변수
 	public static boolean THREAD_STATUS = true; // 쓰레드 상태 주기 
 	// ==============
 	boolean returnPosition = true; // 다시 적을 생성할수 있도록 신호를 주는것
 	// 캐릭터 위치, 점수, 더블 버퍼링, 이미지 변수, 마우스 변수, 승리 판정 변수 선언
-	private Map<Integer, Integer> map = null; // 적 리스트 만들꺼
+	private Map<Integer, Integer> map = null; // 적 리스트 만들꺼 , 
 	Image enemy = new ImageIcon(getClass().getResource("/image/enemy.png")).getImage(); // 연근 이미지 불러오는 작업
 	int enemyY = 50;
 	int[] enemyXList = new int[15]; // 15개의 적들에 x값 좌표
@@ -168,21 +168,30 @@ public class DoubleBuffering extends JFrame implements Runnable {
 		// 적 생성 매소드
 		Random r = new Random();
 		for (int i = 0; i < 15; i++) {
-			int value = r.nextInt(DoubleBuffering.WIDTH);
+			int value = r.nextInt(DoubleBuffering.WIDTH); // 하나에 적에 WIDTH 범위 즉 1600 중으로 랜덤한 값을 가진다.
 			map.put(i, value); // enemy x 축생성
 			this.enemyXList[i] = value;
 		}
 	}
-
+	//paintComponent 에서 호출해준다
 	public void moveEn() {
 		// 적 떨어 트리기 !!!!
 		if (enemyY == 50) {
 			returnPosition = true;
 			enCreate();
 		}
+		switch (SCORE) {
+		case 10:
+			this.eSpeedUp = 1;
+			break;
+		case 20:
+			this.eSpeedUp = 2;
+		case 50:
+			this.eSpeedUp =  4;
+		}
 
 		if (returnPosition) {
-			enemyY = enemyY + (int) (Math.random() * 3); // 적 떨어지는 속도 ..컨트롤
+			enemyY = enemyY + (int) (Math.random() * (2 + this.eSpeedUp) ); // 적 떨어지는 속도 ..컨트롤
 			if (enemyY > HEIGHT) {
 				returnPosition = false;
 			}
@@ -242,13 +251,6 @@ public class DoubleBuffering extends JFrame implements Runnable {
 
 	// 더블 버퍼링에 사용되는 그리기 컴포넌트
 	public void paintComponent(Graphics g) {
-		// 먼저 호출하고 , paint 메소드를 호출 하지만 끝나기 전까지는 계속 paintComponent를 호출 동시에 paint도 호출
-		// enemy 클래스한테 객체 전달\
-		// if(enemyClass.THREAD_SIGNAL) {
-		// System.out.println("start");
-		// Thread t2 = new Thread(new EnemyClass());
-		// t2.start();
-		// }
 
 		// 캐릭터와 위치 정보 나타내기 그리고 코인 나타내기
 		g.setFont(font);
@@ -272,9 +274,6 @@ public class DoubleBuffering extends JFrame implements Runnable {
 		}
 
 		moveEn(); // 떨어지게 + 값을 주어서 떨어지게 한다.
-		// g.drawImage(enemyClass.enemyList.get(0), enemyClass.getX() + 1 ,
-		// enemyClass.getY(),this); //적 그려주기 ...
-		// System.out.println(enemyClass.getX() + " " + enemyClass.getY());
 
 		// 코인과 캐릭터 충돌 감지
 		if (rectX - circleSize < x && x < rectX + rectSize && rectY - circleSize < y && y < rectY + rectSize) {
@@ -331,6 +330,8 @@ public class DoubleBuffering extends JFrame implements Runnable {
 		// TODO Auto-generated method stub
 		
 		if (panelName.equals("endViewer")) {
+			//명령어를 받아서 현제 컨턴츠패널을 전부지우고 세로운걸 불러와 껴주는거다 
+			//결국 메인 프레임안에서 모든 변경 사항이 이루어진다.
 			getContentPane().removeAll();
 			this.endViewer = new EndViewer(this); // 여기 프레임을 보낸다
 			getContentPane().add(this.endViewer);
@@ -354,6 +355,7 @@ public class DoubleBuffering extends JFrame implements Runnable {
 			getContentPane().add(this.insertRank);
 			revalidate();
 		}else if(panelName.equals("retry")) {
+			SCORE = 0; //현제 점수를 초기화 한뒤 다시 게임을 로드한다.
 			getContentPane().removeAll();
 			new Main();
 			this.dispose(); //다시 로그인 창으로 ...
@@ -362,7 +364,7 @@ public class DoubleBuffering extends JFrame implements Runnable {
 	}
 	
 
-//	// 메인 함수
+	// 메인 함수
 //	public static void main(String[] args) {
 //
 //		// 클래스 인스턴스 객체 선언

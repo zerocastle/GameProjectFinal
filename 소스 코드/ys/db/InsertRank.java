@@ -1,5 +1,7 @@
 package ys.db;
 
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
@@ -7,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -15,6 +18,7 @@ import javax.swing.JTextField;
 import doublebuffering.DoubleBuffering;
 
 public class InsertRank extends JPanel {
+	Image backGround = new ImageIcon(getClass().getResource("/image/b.jpg")).getImage();
 
 	Connection con = null;
 	PreparedStatement pstmt = null;
@@ -47,6 +51,13 @@ public class InsertRank extends JPanel {
 		this.add(button);
 		this.add(back);
 	}
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		// TODO Auto-generated method stub
+		super.paintComponent(g);
+		g.drawImage(this.backGround, 0, 0, null);
+	}
 
 	public void addMember() {
 		// TODO Auto-generated method stub
@@ -64,7 +75,23 @@ public class InsertRank extends JPanel {
 				JOptionPane.showMessageDialog(null, "등고에 실패 했습니다.");
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				if(con != null) {
+					con.close();
+				}
+				if(pstmt != null) {
+					pstmt.close();
+				}
+				if(set != null) {
+					set.close();
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
+		
+	
 
 	}
 	class MyActionListenerInsertRank implements ActionListener{
@@ -79,6 +106,7 @@ public class InsertRank extends JPanel {
 				buffer.change("backButton");
 			}else if(command.equals("등록")) {
 				addMember();
+				buffer.change("backButton");
 			}
 		}
 		
